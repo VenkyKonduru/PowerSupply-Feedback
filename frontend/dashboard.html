@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard | PowerPulse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="glass">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            PowerPulse
+        </div>
+        <div class="nav-links">
+            <span id="userName" style="font-weight: 600;"></span>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container animate-fade">
+        <header style="margin-bottom: 2rem;">
+            <h1>Submit Power Supply Feedback</h1>
+            <p style="color: var(--text-muted);">Report any issues or outages in your area.</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Feedback Form -->
+            <div class="card glass">
+                <h3>New Report</h3>
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label for="issueType">Issue Type</label>
+                        <select id="issueType" required>
+                            <option value="" disabled selected>Select an issue type...</option>
+                            <option value="Complete Outage">Complete Outage (Blackout)</option>
+                            <option value="Partial Outage">Partial Outage (Phase Fail)</option>
+                            <option value="Voltage Fluctuations">Voltage Fluctuations (High/Low)</option>
+                            <option value="Transformer Issue">Transformer Sparking/Noise</option>
+                            <option value="Damaged Pole/Wire">Damaged Pole or Hanging Wires</option>
+                            <option value="Meter Fault">Faulty/Burned Meter</option>
+                            <option value="Bill Related">Billing Discrepancies</option>
+                            <option value="New Connection">New Connection Query</option>
+                            <option value="Scheduled Maintenance">Unnotified Maintenance</option>
+                            <option value="Street Light Problem">Street Light Malfunction</option>
+                            <option value="Safety Hazard">Other Safety Hazard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location (Area/District)</label>
+                        <input type="text" id="location" required placeholder="Downtown, North Sector">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Problem Description</label>
+                        <textarea id="description" required rows="4" placeholder="Describe the issue in detail..."></textarea>
+                    </div>
+                    <button type="submit">Submit Feedback</button>
+                </form>
+                <div id="message" style="margin-top: 1rem; font-size: 0.9rem;"></div>
+            </div>
+
+            <!-- Recent Submissions -->
+            <div class="card glass">
+                <h3>My Recent Reports</h3>
+                <div id="feedbackList">
+                    <p style="color: var(--text-muted); text-align: center; margin-top: 2rem;">Loading your reports...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const user = checkAuth();
+        if (user) {
+            document.getElementById('userName').innerText = `Hello, ${user.name}`;
+            loadMyFeedback();
+        }
+
+        document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                issueType: document.getElementById('issueType').value,
+                location: document.getElementById('location').value,
+                description: document.getElementById('description').value
+            };
+            
+            const res = await callAPI('/feedback/submit', 'POST', data);
+            if (res.feedback) {
+                showMessage('Feedback submitted successfully!', 'success');
+                document.getElementById('feedbackForm').reset();
+                loadMyFeedback();
+            } else {
+                showMessage(res.message || 'Submission failed', 'error');
+            }
+        });
+
+        async function loadMyFeedback() {
+            const feedbacks = await callAPI('/feedback/my-feedback');
+            const list = document.getElementById('feedbackList');
+            
+            if (feedbacks.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin-top: 2rem;">No reports submitted yet.</p>';
+                return;
+            }
+
+            list.innerHTML = feedbacks.map(fb => `
+                <div class="feedback-item">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <strong style="color: var(--text);">${fb.issueType}</strong>
+                        <span class="status-badge status-${fb.status.toLowerCase().replace(' ', '')}">${fb.status}</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">${fb.location}</p>
+                    <p style="font-size: 0.9rem; line-height: 1.4;">${fb.description}</p>
+                    ${fb.adminReply ? `<div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(59, 130, 246, 0.1); border-left: 2px solid var(--primary); border-radius: 4px;">
+                        <p style="font-size: 0.8rem; font-weight: 600; color: var(--primary);">Admin Reply:</p>
+                        <p style="font-size: 0.85rem;">${fb.adminReply}</p>
+                    </div>` : ''}
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

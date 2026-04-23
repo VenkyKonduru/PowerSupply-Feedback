@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Supply Feedback Portal | Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            PowerPulse
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-card glass animate-fade">
+            <div class="login-tabs">
+                <button type="button" class="tab-btn active" id="userTab">Resident</button>
+                <button type="button" class="tab-btn" id="adminTab">Administrator</button>
+            </div>
+            <h2 id="loginTitle">Welcome Back</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required placeholder="name@company.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" required placeholder="••••••••">
+                        <button type="button" class="toggle-password" tabindex="-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" id="loginBtn">Sign In</button>
+            </form>
+            <div class="auth-switch">
+                Don't have an account? <a href="register.html">Create one</a>
+            </div>
+            <div id="message" style="margin-top: 1rem; text-align: center; font-size: 0.9rem;"></div>
+
+            <div class="demo-box" id="demoBox">
+                <strong>Demo Credentials</strong>
+                <div id="userDemo">
+                    <div class="demo-item"><span>User Email:</span> <span>user@test.com</span></div>
+                    <div class="demo-item"><span>Password:</span> <span>password123</span></div>
+                </div>
+                <div id="adminDemo" style="display: none;">
+                    <div class="demo-item"><span>Admin Email:</span> <span>powersupplyfeedback@gmail.com</span></div>
+                    <div class="demo-item"><span>Password:</span> <span>admin123</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const userTab = document.getElementById('userTab');
+        const adminTab = document.getElementById('adminTab');
+        const loginTitle = document.getElementById('loginTitle');
+        const userDemo = document.getElementById('userDemo');
+        const adminDemo = document.getElementById('adminDemo');
+        let currentRole = 'user';
+
+        function setRole(role) {
+            currentRole = role;
+            if (role === 'admin') {
+                adminTab.classList.add('active');
+                userTab.classList.remove('active');
+                loginTitle.innerText = 'Admin Portal';
+                userDemo.style.display = 'none';
+                adminDemo.style.display = 'block';
+            } else {
+                userTab.classList.add('active');
+                adminTab.classList.remove('active');
+                loginTitle.innerText = 'Welcome Back';
+                userDemo.style.display = 'block';
+                adminDemo.style.display = 'none';
+            }
+            // Clear message when switching tabs
+            document.getElementById('message').innerText = '';
+        }
+
+        userTab.addEventListener('click', () => setRole('user'));
+        adminTab.addEventListener('click', () => setRole('admin'));
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const res = await callAPI('/auth/login', 'POST', { email, password });
+            
+            if (res.token) {
+                // Check if role matches selected tab (optional but good for UX)
+                if (res.user.role !== currentRole && !(currentRole === 'admin' && res.user.role === 'admin')) {
+                    // If they logged in as user on admin tab or vice versa, we can still let them in 
+                    // but it's better to respect the token's actual role.
+                }
+
+                localStorage.setItem('token', res.token);
+                localStorage.setItem('user', JSON.stringify(res.user));
+                showMessage('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = res.user.role === 'admin' ? 'admin-dashboard.html' : 'dashboard.html';
+                }, 1000);
+            } else {
+                // This will handle the 403 Forbidden 'pending approval' message from backend
+                showMessage(res.message || 'Login failed', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

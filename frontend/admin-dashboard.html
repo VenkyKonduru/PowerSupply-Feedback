@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | PowerPulse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="glass">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            PowerPulse Admin
+        </div>
+        <div class="nav-links">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container animate-fade">
+        <header style="margin-bottom: 2rem;">
+            <h1>Administrator Control Panel</h1>
+            <p style="color: var(--text-muted);">Monitor feedback, view analytics, and manage reports.</p>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card glass">
+                <div class="stat-value" id="statUsers">0</div>
+                <div class="stat-label">Total Residents</div>
+            </div>
+            <div class="stat-card glass">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Total Reports</div>
+            </div>
+            <div class="stat-card glass">
+                <div class="stat-value" id="statPending" style="color: #f59e0b;">0</div>
+                <div class="stat-label">Pending Issues</div>
+            </div>
+            <div class="stat-card glass">
+                <div class="stat-value" id="statSolved" style="color: #10b981;">0</div>
+                <div class="stat-label">Solved Reports</div>
+            </div>
+        </div>
+<div id="superadminSection" style="display: none; margin-top: 2rem;">
+            <div class="card glass">
+                <h3>Pending Admin Approvals</h3>
+                <div id="pendingAdminsList" style="margin-top: 1rem;">
+                    <p style="color: var(--text-muted); text-align: center; margin-top: 1rem;">No pending approvals.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management List -->
+        <div class="dashboard-grid">
+            <div class="card glass">
+                <h3>Recent Submissions</h3>
+                <div id="allFeedbackList" style="margin-top: 1rem;">
+                    <p style="color: var(--text-muted); text-align: center; margin-top: 2rem;">Loading feedback...</p>
+                </div>
+            </div>
+
+            <div class="card glass">
+                <h3>Registered Residents</h3>
+                <div id="residentsList" style="margin-top: 1rem;">
+                    <p style="color: var(--text-muted); text-align: center; margin-top: 2rem;">Loading residents...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Reply -->
+    <div id="replyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:100; justify-content:center; align-items:center;">
+        <div class="card glass auth-card" style="max-width: 500px;">
+            <h3>Update Feedback</h3>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="updateStatus">
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Solved">Solved</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Admin Reply</label>
+                <textarea id="updateReply" rows="4" placeholder="Your response to the resident..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button onclick="closeModal()" style="background: transparent; border: 1px solid var(--glass-border);">Cancel</button>
+                <button onclick="submitUpdate()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const user = checkAuth();
+        if (!user || user.role !== 'admin') {
+            window.location.href = 'index.html';
+        }
+
+        let currentFeedbackId = null;
+        let allFeedbacks = [];
+
+        async function loadAdminData() {
+            const stats = await callAPI('/feedback/stats');
+            document.getElementById('statUsers').innerText = stats.totalUsers || 0;
+            document.getElementById('statTotal').innerText = stats.totalFeedback || 0;
+            document.getElementById('statPending').innerText = stats.pendingFeedback || 0;
+            document.getElementById('statSolved').innerText = stats.solvedFeedback || 0;
+
+            // Superadmin Logic
+            if (user.email === 'powersupplyfeedback@gmail.com') {
+                document.getElementById('superadminSection').style.display = 'block';
+                loadPendingAdmins();
+            }
+
+            // Load Feedback
+            const feedbacks = await callAPI('/feedback/all');
+            allFeedbacks = feedbacks; // Store globally
+            const list = document.getElementById('allFeedbackList');
+            
+            if (feedbacks.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No feedback reports available.</p>';
+            } else {
+                list.innerHTML = feedbacks.map(fb => `
+                    <div class="feedback-item">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <strong>${fb.issueType}</strong>
+                                <p style="font-size: 0.8rem; color: var(--text-muted);">From: ${fb.userName} | ${fb.location}</p>
+                            </div>
+                            <span class="status-badge status-${fb.status.toLowerCase().replace(' ', '')}" 
+                                  style="${fb.status === 'Solved' ? '' : 'cursor: pointer;'}" 
+                                  ${fb.status === 'Solved' ? '' : `onclick="openModal('${fb._id}')"`}>
+                                ${fb.status} ${fb.status === 'Solved' ? '' : '✎'}
+                            </span>
+                        </div>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">${fb.description}</p>
+                        ${fb.adminReply ? `<p style="font-size: 0.85rem; color: var(--primary); margin-top: 0.5rem;">Reply: ${fb.adminReply}</p>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            // Load Residents
+            const residents = await callAPI('/auth/users');
+            const resList = document.getElementById('residentsList');
+            if (residents.length === 0) {
+                resList.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No residents registered.</p>';
+            } else {
+                resList.innerHTML = residents.map(res => `
+                    <div class="feedback-item" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>${res.name}</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Joined: ${new Date(res.createdAt).toLocaleDateString()}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function openModal(id) {
+            currentFeedbackId = id;
+            const fb = allFeedbacks.find(f => f._id === id);
+            if (fb) {
+                document.getElementById('updateStatus').value = fb.status;
+                document.getElementById('updateReply').value = fb.adminReply || '';
+                document.getElementById('replyModal').style.display = 'flex';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('replyModal').style.display = 'none';
+        }
+
+        async function submitUpdate() {
+            const status = document.getElementById('updateStatus').value;
+            const adminReply = document.getElementById('updateReply').value;
+            
+            const res = await callAPI(`/feedback/update/${currentFeedbackId}`, 'PATCH', { status, adminReply });
+            if (res.feedback) {
+                closeModal();
+                loadAdminData();
+            }
+        }
+
+        async function loadPendingAdmins() {
+            const admins = await callAPI('/auth/pending-admins');
+            const list = document.getElementById('pendingAdminsList');
+            if (admins.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin: 2rem 0;">No pending admin approvals.</p>';
+            } else {
+                list.innerHTML = admins.map(adm => `
+                    <div class="pending-admin-item">
+                        <div>
+                            <strong>${adm.name}</strong>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">${adm.email}</p>
+                        </div>
+                        <button onclick="approveAdmin('${adm._id}')" style="padding: 0.5rem 1.25rem; font-size: 0.85rem; width: auto; margin-top: 0;">Approve</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function approveAdmin(id) {
+            const res = await callAPI(`/auth/approve-admin/${id}`, 'PATCH');
+            if (res.message.includes('successfully')) {
+                loadPendingAdmins();
+            }
+        }
+
+        loadAdminData();
+    </script>
+</body>
+</html>
