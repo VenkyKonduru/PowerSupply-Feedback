@@ -62,7 +62,6 @@ A premium, full-stack feedback management system designed for seamless communica
    ```bash
    npm start
    # or
-   cd backend
    node server.js
    ```
    The portal will be accessible at `http://localhost:5000`.
