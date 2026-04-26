@@ -41,18 +41,6 @@
                 Don't have an account? <a href="register.html">Create one</a>
             </div>
             <div id="message" style="margin-top: 1rem; text-align: center; font-size: 0.9rem;"></div>
-
-            <div class="demo-box" id="demoBox">
-                <strong>Demo Credentials</strong>
-                <div id="userDemo">
-                    <div class="demo-item"><span>User Email:</span> <span>user@test.com</span></div>
-                    <div class="demo-item"><span>Password:</span> <span>password123</span></div>
-                </div>
-                <div id="adminDemo" style="display: none;">
-                    <div class="demo-item"><span>Admin Email:</span> <span>powersupplyfeedback@gmail.com</span></div>
-                    <div class="demo-item"><span>Password:</span> <span>admin123</span></div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -61,8 +49,6 @@
         const userTab = document.getElementById('userTab');
         const adminTab = document.getElementById('adminTab');
         const loginTitle = document.getElementById('loginTitle');
-        const userDemo = document.getElementById('userDemo');
-        const adminDemo = document.getElementById('adminDemo');
         let currentRole = 'user';
 
         function setRole(role) {
@@ -71,14 +57,10 @@
                 adminTab.classList.add('active');
                 userTab.classList.remove('active');
                 loginTitle.innerText = 'Admin Portal';
-                userDemo.style.display = 'none';
-                adminDemo.style.display = 'block';
             } else {
                 userTab.classList.add('active');
                 adminTab.classList.remove('active');
                 loginTitle.innerText = 'Welcome Back';
-                userDemo.style.display = 'block';
-                adminDemo.style.display = 'none';
             }
             // Clear message when switching tabs
             document.getElementById('message').innerText = '';

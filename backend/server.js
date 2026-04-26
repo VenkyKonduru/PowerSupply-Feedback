@@ -26,8 +26,34 @@ app.get(/(.*)/, (req, res) => {
 });
 
 // Database Connection
+const User = require('./models/User');
+
+const seedSuperAdmin = async () => {
+    try {
+        const superAdminEmail = 'powersupplyfeedback@gmail.com';
+        const existingAdmin = await User.findOne({ email: superAdminEmail });
+        
+        if (!existingAdmin) {
+            const superAdmin = new User({
+                name: 'Super Admin',
+                email: superAdminEmail,
+                password: 'admin123',
+                role: 'admin',
+                isApproved: true
+            });
+            await superAdmin.save();
+            console.log('Super Admin account created successfully');
+        }
+    } catch (error) {
+        console.error('Error seeding super admin:', error);
+    }
+};
+
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('Connected to MongoDB'))
+    .then(() => {
+        console.log('Connected to MongoDB');
+        seedSuperAdmin();
+    })
     .catch((err) => console.log('MongoDB connection error:', err));
 
 app.listen(PORT, () => {
