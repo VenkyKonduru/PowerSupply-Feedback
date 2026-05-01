@@ -16,11 +16,7 @@
 
     <div class="auth-container">
         <div class="auth-card glass animate-fade">
-            <div class="login-tabs">
-                <button type="button" class="tab-btn active" id="userTab">Resident</button>
-                <button type="button" class="tab-btn" id="adminTab">Administrator</button>
-            </div>
-            <h2 id="loginTitle">Welcome Back</h2>
+            <h2 id="loginTitle">Sign In to PowerPulse</h2>
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">Email Address</label>
@@ -46,41 +42,13 @@
 
     <script src="app.js"></script>
     <script>
-        const userTab = document.getElementById('userTab');
-        const adminTab = document.getElementById('adminTab');
-        const loginTitle = document.getElementById('loginTitle');
-        let currentRole = 'user';
-
-        function setRole(role) {
-            currentRole = role;
-            if (role === 'admin') {
-                adminTab.classList.add('active');
-                userTab.classList.remove('active');
-                loginTitle.innerText = 'Admin Portal';
-            } else {
-                userTab.classList.add('active');
-                adminTab.classList.remove('active');
-                loginTitle.innerText = 'Welcome Back';
-            }
-            // Clear message and form when switching tabs
-            document.getElementById('message').innerText = '';
-            document.getElementById('loginForm').reset();
-        }
-
-        userTab.addEventListener('click', () => setRole('user'));
-        adminTab.addEventListener('click', () => setRole('admin'));
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const res = await callAPI('/auth/login', 'POST', { email, password, role: currentRole });
+            const res = await callAPI('/auth/login', 'POST', { email, password });
             
             if (res.token) {
-                if (res.user.role !== currentRole) {
-                    showMessage('Invalid credentials for the selected role.', 'error');
-                    return;
-                }
 
                 localStorage.setItem('token', res.token);
                 localStorage.setItem('user', JSON.stringify(res.user));
