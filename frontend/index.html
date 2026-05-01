@@ -62,8 +62,9 @@
                 adminTab.classList.remove('active');
                 loginTitle.innerText = 'Welcome Back';
             }
-            // Clear message when switching tabs
+            // Clear message and form when switching tabs
             document.getElementById('message').innerText = '';
+            document.getElementById('loginForm').reset();
         }
 
         userTab.addEventListener('click', () => setRole('user'));
@@ -73,13 +74,12 @@
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const res = await callAPI('/auth/login', 'POST', { email, password });
+            const res = await callAPI('/auth/login', 'POST', { email, password, role: currentRole });
             
             if (res.token) {
-                // Check if role matches selected tab (optional but good for UX)
-                if (res.user.role !== currentRole && !(currentRole === 'admin' && res.user.role === 'admin')) {
-                    // If they logged in as user on admin tab or vice versa, we can still let them in 
-                    // but it's better to respect the token's actual role.
+                if (res.user.role !== currentRole) {
+                    showMessage('Invalid credentials for the selected role.', 'error');
+                    return;
                 }
 
                 localStorage.setItem('token', res.token);
