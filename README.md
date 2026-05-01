@@ -88,7 +88,7 @@ A premium, full-stack feedback management system designed for seamless communica
 ## 🔒 Demo Credentials
 
 - **Resident**: `user@test.com` | `password123`
-- **Administrator**: `powersupplyfeedback@gmail.com` | `admin123`
+- **Administrator**: `powersupplyfeedback@powerpulse.com` | `admin123`
 
 ---
 Developed with ❤️ for efficient utility management.

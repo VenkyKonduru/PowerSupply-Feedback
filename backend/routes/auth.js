@@ -15,10 +15,13 @@ router.post('/register', async (req, res) => {
         let userRole = role || 'user';
         let approved = true;
 
-        if (email === 'powersupplyfeedback@gmail.com') {
+        if (email === 'powersupplyfeedback@powerpulse.com') {
             userRole = 'admin';
             approved = true;
         } else if (userRole === 'admin') {
+            if (!email.endsWith('@powerpulse.com')) {
+                return res.status(400).json({ message: 'Admins must use a @powerpulse.com email address' });
+            }
             approved = false;
         }
 
@@ -34,7 +37,8 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password, role } = req.body;
-        const user = await User.findOne({ email });
+        const trimmedEmail = email ? email.trim() : email;
+        const user = await User.findOne({ email: trimmedEmail });
         if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
         if (role && user.role !== role) {

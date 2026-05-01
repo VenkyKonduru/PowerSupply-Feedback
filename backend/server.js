@@ -30,7 +30,7 @@ const User = require('./models/User');
 
 const seedSuperAdmin = async () => {
     try {
-        const superAdminEmail = 'powersupplyfeedback@gmail.com';
+        const superAdminEmail = 'powersupplyfeedback@powerpulse.com';
         const existingAdmin = await User.findOne({ email: superAdminEmail });
         
         if (!existingAdmin) {
