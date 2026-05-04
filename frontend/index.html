@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Power Supply Feedback Portal | Login</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <nav>
         <div class="logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
             PowerPulse
         </div>
     </nav>
@@ -27,8 +31,19 @@
                     <div class="password-wrapper">
                         <input type="password" id="password" required placeholder="••••••••">
                         <button type="button" class="toggle-password" tabindex="-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
                         </button>
+                    </div>
+                    <div style="margin-top: 0.5rem; text-align: right;">
+                        <a href="#" id="forgotPasswordLink"
+                            style="font-size: 0.8rem; color: var(--primary); text-decoration: none; font-weight: 500; hover: var(--primary-glow);">Forgot
+                            password?</a>
                     </div>
                 </div>
                 <button type="submit" id="loginBtn">Sign In</button>
@@ -47,7 +62,7 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const res = await callAPI('/auth/login', 'POST', { email, password });
-            
+
             if (res.token) {
 
                 localStorage.setItem('token', res.token);
@@ -61,6 +76,19 @@
                 showMessage(res.message || 'Login failed', 'error');
             }
         });
+
+        document.getElementById('forgotPasswordLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('email').value;
+            const email = emailInput || prompt('Please enter your email address to reset your password:');
+
+            if (!email) return;
+
+            showMessage('Sending reset link...', 'info');
+            const res = await callAPI('/auth/forgot-password', 'POST', { email });
+            showMessage(res.message || 'If an account exists, a reset link was sent.', 'success');
+        });
     </script>
 </body>
+
 </html>

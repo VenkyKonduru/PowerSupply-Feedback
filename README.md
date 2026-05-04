@@ -9,6 +9,7 @@ A premium, full-stack feedback management system designed for seamless communica
 - **Dual-Portal Access**: Dedicated interfaces for Residents (Report Issues) and Administrators (Manage Feedback).
 - **Secure Authentication**: JWT-based security with password hashing (Bcrypt) and role-based access control.
 - **Admin Approval Workflow**: Robust security where new admin accounts must be approved by a super-admin before gaining access.
+- **Secure Password Reset**: Secure token-based password reset flow with automated email delivery via Nodemailer.
 - **Feedback Lifecycle Management**: Track reports from 'Pending' to 'In Progress' and 'Resolved' with real-time status updates.
 - **Modern UI/UX**: Premium "Glassmorphism" design system with responsive layouts, smooth animations, and intuitive navigation.
 - **Email Notifications**: Automated alerts for administrators when new feedback is submitted.
@@ -73,6 +74,7 @@ A premium, full-stack feedback management system designed for seamless communica
 │   ├── middleware/   # JWT & Role validation
 │   ├── models/       # Mongoose Schemas (User, Feedback)
 │   ├── routes/       # API Endpoints (Auth, Feedback)
+│   ├── utils/        # Utilities (sendEmail)
 │   ├── server.js     # Entry point & App configuration
 │   └── .env          # Environment variables
 ├── frontend/
@@ -80,6 +82,7 @@ A premium, full-stack feedback management system designed for seamless communica
 │   ├── register.html # Registration page
 │   ├── dashboard.html # Resident portal
 │   ├── admin-dashboard.html # Administrator portal
+│   ├── reset-password.html  # Secure token-based password reset
 │   ├── style.css     # Global styles & Design system
 │   └── app.js        # Frontend logic & API calls
 └── README.md
