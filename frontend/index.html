@@ -41,9 +41,7 @@
                         </button>
                     </div>
                     <div style="margin-top: 0.5rem; text-align: right;">
-                        <a href="#" id="forgotPasswordLink"
-                            style="font-size: 0.8rem; color: var(--primary); text-decoration: none; font-weight: 500; hover: var(--primary-glow);">Forgot
-                            password?</a>
+                        <a href="forgot-password.html" class="forgot-password-link">Forgot password?</a>
                     </div>
                 </div>
                 <button type="submit" id="loginBtn">Sign In</button>
@@ -77,17 +75,7 @@
             }
         });
 
-        document.getElementById('forgotPasswordLink').addEventListener('click', async (e) => {
-            e.preventDefault();
-            const emailInput = document.getElementById('email').value;
-            const email = emailInput || prompt('Please enter your email address to reset your password:');
 
-            if (!email) return;
-
-            showMessage('Sending reset link...', 'info');
-            const res = await callAPI('/auth/forgot-password', 'POST', { email });
-            showMessage(res.message || 'If an account exists, a reset link was sent.', 'success');
-        });
     </script>
 </body>
 

@@ -80,9 +80,10 @@ A premium, full-stack feedback management system designed for seamless communica
 ├── frontend/
 │   ├── index.html    # Login page
 │   ├── register.html # Registration page
+│   ├── forgot-password.html # Request password reset link
+│   ├── reset-password.html  # Secure token-based password reset
 │   ├── dashboard.html # Resident portal
 │   ├── admin-dashboard.html # Administrator portal
-│   ├── reset-password.html  # Secure token-based password reset
 │   ├── style.css     # Global styles & Design system
 │   └── app.js        # Frontend logic & API calls
 └── README.md
