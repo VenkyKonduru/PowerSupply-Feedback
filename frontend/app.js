@@ -1,4 +1,6 @@
-const API_URL = 'https://powersupply-feedback.onrender.com/api';
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') 
+    ? 'http://localhost:5000/api' 
+    : 'https://powersupply-feedback.onrender.com/api';
 
 async function callAPI(endpoint, method = 'GET', body = null) {
     const headers = {
