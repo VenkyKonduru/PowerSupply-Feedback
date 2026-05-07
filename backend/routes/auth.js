@@ -17,12 +17,12 @@ router.post('/register', async (req, res) => {
         let userRole = role || 'user';
         let approved = true;
 
-        if (email === 'powersupplyfeedback@powerpulse.com') {
+        if (email === 'powersupplyfeedback@gmail.com') {
             userRole = 'admin';
             approved = true;
         } else if (userRole === 'admin') {
-            if (!email.endsWith('@powerpulse.com')) {
-                return res.status(400).json({ message: 'Admins must use a @powerpulse.com email address' });
+            if (!email.endsWith('@gmail.com')) {
+                return res.status(400).json({ message: 'Admins must use a @gmail.com email address' });
             }
             approved = false;
         }
